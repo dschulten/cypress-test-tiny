@@ -1,0 +1,35 @@
+resources:
+  - name: cypress-test-tiny
+    type: git
+    source:
+      uri: https://github.com/dschulten/cypress-test-tiny.git
+      branch: feature/dropzonejs
+
+jobs:
+  - name: cypress
+    plan:
+      - get: cypress-test-tiny
+        trigger: true
+      - task: run-cypress-task
+        input_mapping:
+          e2e: cypress-test-tiny
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: cypress/included
+              tag: 9.2.0
+          inputs:
+           - name: e2e
+          outputs:
+            - name: the-artifact
+          run:
+            dir: e2e
+            # This is a neat way of embedding a script into a task
+            path: sh
+            args:
+              - -cx
+              - |
+                ls -l .
+                cypress run
